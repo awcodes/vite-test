@@ -1,24 +1,38 @@
+import fs from "fs";
+import { homedir } from "os";
+import { resolve } from "path";
 import laravel from "laravel-vite-plugin";
 import { defineConfig } from "vite";
-import { detectServerConfig } from "./vite-valet";
+
+let inputs = [];
+const host = "vitest.test";
+
+if (process.env.TAILWIND_CONFIG) {
+    inputs = [`resources/css/${process.env.TAILWIND_CONFIG}.css`];
+} else {
+    inputs = [
+        "resources/css/app.css",
+        "resources/js/app.js",
+        "resources/js/push.js",
+    ];
+}
 
 export default defineConfig({
     plugins: [
         laravel({
-            input: [
-                "resources/css/app.css",
-                "resources/js/app.js",
-                "resources/js/push.js",
-            ],
+            input: inputs,
             refresh: true,
         }),
     ],
-    server: detectServerConfig("vitest.test"),
+    server: detectServerConfig(host),
     css: {
         postcss: {
             plugins: [
+                require("tailwindcss/nesting"),
                 require("tailwindcss")({
-                    config: "./tailwind.config.js",
+                    config:
+                        `tailwind-${process.env?.TAILWIND_CONFIG}.config.js` ??
+                        "./tailwind.config.js",
                 }),
                 require("autoprefixer"),
             ],
@@ -28,3 +42,28 @@ export default defineConfig({
         outDir: "./public/build/frontend",
     },
 });
+
+function detectServerConfig(host) {
+    let keyPath = resolve(homedir(), `.config/valet/Certificates/${host}.key`);
+    let certificatePath = resolve(
+        homedir(),
+        `.config/valet/Certificates/${host}.crt`
+    );
+
+    if (!fs.existsSync(keyPath)) {
+        return {};
+    }
+
+    if (!fs.existsSync(certificatePath)) {
+        return {};
+    }
+
+    return {
+        hmr: { host },
+        host,
+        https: {
+            key: fs.readFileSync(keyPath),
+            cert: fs.readFileSync(certificatePath),
+        },
+    };
+}

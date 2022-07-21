@@ -1,6 +1,6 @@
 <x-guest-layout>
     <main>
-        <h1>Welcome</h1>
+        <h1 class="px-6 py-3 text-2xl text-white bg-gray-900">Welcome</h1>
     <main>
 
     @push('scripts')
