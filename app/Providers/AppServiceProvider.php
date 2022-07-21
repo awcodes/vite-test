@@ -26,10 +26,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
         Filament::serving(function () {
-            Filament::registerTheme('');
-            Filament::registerRenderHook(
-              'head.end',
-                static fn () => (new Vite)(['resources/css/filament.css'], 'build/filament')
+            Filament::registerTheme(
+                app(Vite::class)('resources/css/filament.css', 'build/filament'),
             );
         });
     }

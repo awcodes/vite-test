@@ -30,16 +30,18 @@ export default defineConfig({
             plugins: [
                 require("tailwindcss/nesting"),
                 require("tailwindcss")({
-                    config:
-                        `tailwind-${process.env?.TAILWIND_CONFIG}.config.js` ??
-                        "./tailwind.config.js",
+                    config: process.env?.TAILWIND_CONFIG
+                        ? `tailwind-${process.env.TAILWIND_CONFIG}.config.js`
+                        : "./tailwind.config.js",
                 }),
                 require("autoprefixer"),
             ],
         },
     },
     build: {
-        outDir: "./public/build/frontend",
+        outDir: process.env?.TAILWIND_CONFIG
+            ? `./public/build/${process.env.TAILWIND_CONFIG}`
+            : "./public/build/frontend",
     },
 });
 
